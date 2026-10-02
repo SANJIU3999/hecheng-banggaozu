@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b0d13">
+<title>合成邦高祖</title>
+<meta name="description" content="合成邦高祖：相同的球撞到一起就合成更大的球。">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23ffc53d'/><circle cx='50' cy='50' r='46' fill='none' stroke='%23000' stroke-opacity='.3' stroke-width='4'/><text x='50' y='62' font-size='44' font-weight='bold' text-anchor='middle' fill='%23fff'>1</text></svg>">
+</head>
+<body>
+
+<!-- 背景视频（压缩后，静音，雾化） -->
+<video id="bgVideo" autoplay muted loop playsinline preload="auto">
+  <source src="assets/bg.mp4" type="video/mp4">
+</video>
+<div class="fog" aria-hidden="true"></div>
+
+<div class="app">
+  <header class="topbar">
+    <div class="stat"><span>得分</span><b id="score">0</b></div>
+    <div class="next">
+      <span>下一个</span>
+      <canvas id="nextCanvas"></canvas>
+    </div>
+    <div class="stat"><span>最高</span><b id="best">0</b></div>
+    <button class="icon" id="btnSound" title="音效开关" aria-label="音效开关">🔊</button>
+    <button class="icon" id="btnSize" title="游戏大小" aria-label="游戏大小">大</button>
+    <button class="icon" id="btnMenu" title="返回主界面" aria-label="返回主界面">🏠</button>
+    <button class="icon" id="btnRestart" title="重新开始" aria-label="重新开始">↻</button>
+  </header>
+
+  <main class="stage">
+    <canvas id="game"></canvas>
+    <div class="toast" id="toast"></div>
+
+    <div class="overlay" id="overlayStart">
+      <h2>合成邦高祖</h2>
+      <p>相同的球碰到一起，就合成更大的球。<br>球堆碰到红线持续 3 秒即失败。</p>
+      <button class="btn" id="btnStart">开始</button>
+      <p class="small">鼠标 / 手指移动瞄准 · 松手投放<br>键盘 ← → 瞄准 · 空格投放</p>
+    </div>
+
+    <div class="overlay" id="overlayOver" hidden>
+      <h2>游戏结束</h2>
+      <div class="big-score" id="finalScore">0</div>
+      <p>最高 <b id="finalBest">0</b></p>
+      <button class="btn" id="btnRetry">再来一局</button>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="progress" id="progress"></div>
+    <div class="hint">相同的球相撞即合成</div>
+  </footer>
+</div>
+
+<script src="js/physics.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
