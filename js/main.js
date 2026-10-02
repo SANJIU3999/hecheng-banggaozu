@@ -104,7 +104,9 @@
     shake: 0,
     statMerges: 0,
     statSpawned: 0,
-    debug: false
+    debug: false,
+    debugDeleteMode: false,   // 调试控制台：删除球模式
+    debugNextTier: 0          // 调试控制台：强制下一个球等级（0=自动）
   };
 
   /* ============================ 缩放 ============================ */
@@ -131,6 +133,7 @@
 
   function pickTier() {
     if (forceSpawn && forceSpawn.length) return clamp(forceSpawn.shift(), 1, MAX_TIER);
+    if (G.debugNextTier >= 1 && G.debugNextTier <= MAX_TIER) return G.debugNextTier;
     /* 生成的球大小不超过 3（只随机 1~3） */
     var cap = Math.min(3, MAX_TIER);
     var total = 0, i;
@@ -302,6 +305,29 @@
     if (i >= 0) G.active.splice(i, 1);
   }
 
+  /* 调试：点击删除某个球（返回是否命中） */
+  function deleteBallAt(clientX, clientY) {
+    var rect = canvas.getBoundingClientRect();
+    var wx = (clientX - rect.left) / rect.width * W;
+    var wy = (clientY - rect.top) / rect.height * H;
+    var best = null, bestD = Infinity;
+    for (var i = 0; i < G.active.length; i++) {
+      var b = G.active[i];
+      if (b.dead) continue;
+      var cr = Math.max(b.r, 15);           // 太小球也容易点中
+      var dx = b.x - wx, dy = b.y - wy;
+      var d2 = dx * dx + dy * dy;
+      if (d2 <= cr * cr && d2 < bestD) { best = b; bestD = d2; }
+    }
+    if (!best) return false;
+    best.dead = true;
+    world.remove(best);
+    removeActive(best);
+    burst(best.x, best.y, best.tier);
+    toast('已删除 · ' + BALLS[best.tier - 1].name);
+    return true;
+  }
+
   function merge(a, b, tier) {
     a.dead = b.dead = true;
     world.remove(a); world.remove(b);
@@ -467,6 +493,7 @@
 
   canvas.addEventListener('pointerdown', function (e) {
     if (G.state !== 'playing') return;
+    if (G.debugDeleteMode) { e.preventDefault(); return; }
     canvas.setPointerCapture && canvas.setPointerCapture(e.pointerId);
     G.pointerDown = true;
     setAim(e.clientX);
@@ -480,6 +507,7 @@
   });
   canvas.addEventListener('pointerup', function (e) {
     if (G.state !== 'playing') return;
+    if (G.debugDeleteMode) { deleteBallAt(e.clientX, e.clientY); e.preventDefault(); return; }
     G.pointerDown = false;
     setAim(e.clientX);
     drop();
@@ -534,6 +562,58 @@
     });
   }
   applySize();
+
+  /* ============================ 调试控制台（按 wwssadad 呼出） ============================ */
+  var conEl = $('#console');
+  var conOpen = false;
+  function syncConsoleUI() {
+    var delBtn = $('#conDelete');
+    if (delBtn) {
+      delBtn.textContent = G.debugDeleteMode ? '删除模式：开' : '删除模式：关';
+      delBtn.classList.toggle('active', G.debugDeleteMode);
+    }
+    var tiers = document.querySelectorAll('#console .tier-btn');
+    for (var i = 0; i < tiers.length; i++) {
+      var t = Number(tiers[i].getAttribute('data-tier'));
+      tiers[i].classList.toggle('active', t === G.debugNextTier);
+    }
+  }
+  function toggleConsole(force) {
+    conOpen = force !== undefined ? force : !conOpen;
+    if (conEl) conEl.hidden = !conOpen;
+    if (conOpen) syncConsoleUI();
+  }
+
+  var CODE = 'wwssadad', codeIndex = 0;
+  document.addEventListener('keydown', function (e) {
+    if (conOpen) return;
+    var k = (e.key || '').toLowerCase();
+    if (k.length !== 1) return;
+    if (k === CODE[codeIndex]) {
+      codeIndex++;
+      if (codeIndex === CODE.length) { codeIndex = 0; toggleConsole(true); }
+    } else {
+      codeIndex = (k === CODE[0]) ? 1 : 0;
+    }
+  });
+
+  var conClose = $('#conClose');
+  if (conClose) conClose.addEventListener('click', function () { toggleConsole(false); });
+  var conDelete = $('#conDelete');
+  if (conDelete) conDelete.addEventListener('click', function () {
+    G.debugDeleteMode = !G.debugDeleteMode;
+    syncConsoleUI();
+    toast(G.debugDeleteMode ? '删除模式已开启：点球删除' : '删除模式已关闭');
+  });
+  var tierBtns = document.querySelectorAll('#console .tier-btn');
+  for (var ti = 0; ti < tierBtns.length; ti++) {
+    tierBtns[ti].addEventListener('click', function () {
+      var t = Number(this.getAttribute('data-tier'));
+      G.debugNextTier = t;
+      syncConsoleUI();
+      toast(t >= 1 ? ('下一个球固定为等级 ' + t + ' · ' + BALLS[t - 1].name) : '下一个球恢复随机');
+    });
+  }
 
   /* ============================ 更新 ============================ */
   function physicsStep(dt) {
@@ -875,6 +955,8 @@
     G.debug = !!p.debug;
     if (p.small !== undefined) { smallSize = (p.small === '1'); applySize(); }
     if (p.boom) setTimeout(playBoom, 400);   // 调试：直接播一次爆炸特效
+    if (p.console) toggleConsole(true);      // 调试：直接打开控制台
+    if (p.nexttier) { G.debugNextTier = clamp(Number(p.nexttier), 1, MAX_TIER); syncConsoleUI(); }
     if (p.spawn) forceSpawn = p.spawn.split(',').map(Number);   // 先定出鱼顺序，reset 时就会用
     if (p.auto) reset();
     if (p.drop) {

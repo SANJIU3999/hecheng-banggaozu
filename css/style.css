@@ -67,6 +67,50 @@ body {
 }
 #fxBoom.on { opacity: 1; }
 
+/* ---------- 调试控制台（wwssadad 呼出） ---------- */
+.console {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  width: 272px;
+  z-index: 80;
+  background: rgba(14, 18, 28, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  padding: 12px 14px;
+  color: var(--text);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+}
+.console[hidden] { display: none; }
+.con-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px; font-weight: 700; letter-spacing: 1px;
+}
+.con-x {
+  width: 24px; height: 24px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--text); cursor: pointer;
+  display: grid; place-items: center; font-size: 12px;
+}
+.con-row { margin-bottom: 10px; }
+.con-label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 5px; letter-spacing: .5px; }
+.con-btn {
+  width: 100%; padding: 7px 10px; border-radius: 9px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--text); cursor: pointer; font-size: 13px;
+}
+.con-btn.active, .tier-btn.active {
+  background: #4d9fff; border-color: #4d9fff; color: #fff;
+}
+.con-tiers { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
+.tier-btn {
+  padding: 6px 0; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--text); cursor: pointer; font-size: 13px;
+}
+.tier-btn[data-tier="0"] { grid-column: span 2; }
+.con-hint { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
 /* ---------- 游戏容器（固定大小，大/小只改球大小） ---------- */
 .app {
   position: relative;
