@@ -51,6 +51,22 @@ body {
   pointer-events: none;
 }
 
+/* ---------- 合成最大球时的全屏爆炸特效（screen 混合，黑底变透明） ---------- */
+#fxBoom {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  object-position: center;
+  mix-blend-mode: screen;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+#fxBoom.on { opacity: 1; }
+
 /* ---------- 游戏容器（固定大小，大/小只改球大小） ---------- */
 .app {
   position: relative;

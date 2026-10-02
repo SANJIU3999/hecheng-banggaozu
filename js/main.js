@@ -55,6 +55,19 @@
   var ctx = canvas.getContext('2d');
   var nextCanvas = $('#nextCanvas');
 
+  /* 合成出最大球（户山香橙）时的全屏爆炸特效 */
+  var fxBoom = $('#fxBoom');
+  function playBoom() {
+    if (!fxBoom) return;
+    try {
+      fxBoom.currentTime = 0;
+      fxBoom.classList.add('on');
+      var p = fxBoom.play();
+      if (p && p.catch) p.catch(function () {});
+    } catch (e) {}
+  }
+  if (fxBoom) fxBoom.addEventListener('ended', function () { fxBoom.classList.remove('on'); });
+
   var world = new Phys.World({
     gravity: 1900,
     restitution: 0.10,
@@ -324,6 +337,8 @@
 
     /* 出现「新的最大球」：合成音效 + 切换该角色 BGM（循环到下一个更大球） */
     onNewMax(nt, true);
+    /* 合成出最大的球（户山香橙）时全屏播放爆炸特效 */
+    if (nt >= MAX_TIER) playBoom();
     if (!G.found[nt]) { G.found[nt] = true; updateProgress(); }
     updateHUD();
   }
@@ -859,6 +874,7 @@
   function debugAutoplay(p) {
     G.debug = !!p.debug;
     if (p.small !== undefined) { smallSize = (p.small === '1'); applySize(); }
+    if (p.boom) setTimeout(playBoom, 400);   // 调试：直接播一次爆炸特效
     if (p.spawn) forceSpawn = p.spawn.split(',').map(Number);   // 先定出鱼顺序，reset 时就会用
     if (p.auto) reset();
     if (p.drop) {
