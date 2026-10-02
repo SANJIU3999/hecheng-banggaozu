@@ -20,16 +20,16 @@
 
   /* 10 个等级：从小到大（名字用于 BGM / 图鉴；图片在 assets/ball-01..10.png） */
   var BALLS = [
-    { name: '千早爱音', color: '#ff5c6c', r: 18 },
-    { name: '仓田真白', color: '#ff8a3d', r: 23 },
-    { name: '美竹兰',   color: '#ffc53d', r: 28 },
-    { name: '丸山彩',   color: '#a8d64c', r: 35 },
-    { name: '丰川祥子', color: '#3dd68c', r: 42 },
-    { name: '高松灯',   color: '#37c8e8', r: 53 },
-    { name: '友希那',   color: '#4d7cff', r: 65 },
-    { name: '和奏瑞依', color: '#9b5cff', r: 80 },
-    { name: '弦卷心',   color: '#e84da8', r: 101 },
-    { name: '户山香橙', color: '#f2f4f8', r: 125 }
+    { name: '千早爱音', color: '#ff5c6c', r: 27 },
+    { name: '仓田真白', color: '#ff8a3d', r: 35 },
+    { name: '美竹兰',   color: '#ffc53d', r: 42 },
+    { name: '丸山彩',   color: '#a8d64c', r: 53 },
+    { name: '丰川祥子', color: '#3dd68c', r: 63 },
+    { name: '高松灯',   color: '#37c8e8', r: 80 },
+    { name: '友希那',   color: '#4d7cff', r: 98 },
+    { name: '和奏瑞依', color: '#9b5cff', r: 120 },
+    { name: '弦卷心',   color: '#e84da8', r: 152 },
+    { name: '户山香橙', color: '#f2f4f8', r: 188 }
   ];
 
   /* ---- 颜色工具 ---- */
