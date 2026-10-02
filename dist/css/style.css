@@ -1,0 +1,213 @@
+/* ===========================================================
+   合成大肥鱼 · 暗色简洁主题 + 视频背景雾化
+   =========================================================== */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg: #0b0d13;
+  --panel: rgba(20, 25, 36, 0.78);
+  --panel2: rgba(28, 33, 48, 0.9);
+  --line: rgba(255, 255, 255, 0.10);
+  --text: #e8ebf2;
+  --muted: #a6b0c4;
+  --accent: #4d9fff;
+  --danger: #ff5a6e;
+}
+
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+/* ---------- 背景视频 + 雾化 ---------- */
+#bgVideo {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 70% 50%;          /* 偏向右侧，露出右边跳动的玩偶 */
+  transform: scale(1.06);            /* 略微放大，避免边缘露黑 */
+  filter: brightness(0.88) saturate(0.95);
+  z-index: 0;
+  pointer-events: none;
+}
+.fog {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(120% 100% at 50% 40%, rgba(10, 13, 20, 0.18), rgba(8, 10, 16, 0.40)),
+    rgba(8, 10, 16, 0.18);
+  backdrop-filter: blur(2px);        /* 雾化背景视频 */
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ---------- 游戏容器（固定大小，大/小只改球大小） ---------- */
+.app {
+  position: relative;
+  z-index: 2;
+  width: min(448px, 100vw);
+  min-width: 0;
+  max-width: 100vw;
+  height: min(800px, 100vh);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: calc(10px + env(safe-area-inset-top)) 12px calc(10px + env(safe-area-inset-bottom));
+}
+
+/* ---------- 顶栏 ---------- */
+.topbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.stat {
+  flex: 0 0 auto;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 5px 12px;
+  text-align: center;
+  min-width: 58px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.stat span { display: block; font-size: 10px; letter-spacing: 1.2px; color: var(--muted); }
+.stat b { display: block; font-size: 20px; line-height: 1.15; font-variant-numeric: tabular-nums; }
+
+.next {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 4px 12px 4px 6px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.next span { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+.next canvas { width: 44px; height: 44px; }
+
+.icon {
+  flex: 0 0 auto;
+  width: 38px; height: 38px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  font-size: 18px;
+  cursor: pointer;
+  display: grid; place-items: center;
+  transition: transform .12s ease, background .15s ease;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.icon:hover { background: var(--panel2); transform: translateY(-2px); }
+.icon:active { transform: scale(.94); }
+.icon.off { filter: grayscale(1); opacity: .7; }
+
+/* ---------- 舞台（半透明毛玻璃鱼缸，隐约透出背景视频） ---------- */
+.stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  border-radius: 22px;
+  background: rgba(14, 18, 28, 0.30);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 7px;
+  backdrop-filter: blur(10px) saturate(1.1);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.30);
+}
+#game { display: block; width: 100%; height: 100%; cursor: grab; }
+#game:active { cursor: grabbing; }
+
+.toast {
+  position: absolute; left: 50%; bottom: 24px;
+  transform: translateX(-50%) translateY(10px);
+  background: rgba(255, 90, 110, .95);
+  color: #fff; font-size: 12.5px; font-weight: 700;
+  padding: 7px 16px; border-radius: 999px;
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+  z-index: 5;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ---------- 遮罩 ---------- */
+.overlay {
+  position: absolute; inset: 7px;
+  border-radius: 16px;
+  background: rgba(8, 10, 16, .82);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 12px; padding: 20px; z-index: 6;
+  text-align: center;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.overlay[hidden] { display: none; }
+.overlay h2 { font-size: 26px; letter-spacing: 2px; }
+.overlay p { color: var(--muted); font-size: 13px; line-height: 1.8; }
+.overlay p.small { font-size: 11px; line-height: 1.7; }
+.overlay .big-score { color: var(--accent); font-size: 44px; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+.btn {
+  border: none; cursor: pointer;
+  border-radius: 999px;
+  padding: 11px 30px;
+  font-size: 15px; font-weight: 700; letter-spacing: 1px;
+  color: #fff;
+  background: linear-gradient(150deg, #4d9fff, #3b82e0);
+  transition: transform .12s ease;
+  font-family: inherit;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: scale(.97); }
+
+/* ---------- 底部 ---------- */
+.footer { flex: 0 0 auto; display: flex; flex-direction: column; gap: 7px; }
+.progress { display: flex; gap: 6px; justify-content: center; }
+.progress .dot {
+  flex: 1 1 0; height: 14px; border-radius: 7px;
+  opacity: .22; filter: saturate(.4);
+  transition: opacity .3s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,.4);
+}
+.progress .dot.on { opacity: 1; filter: none; }
+.hint { text-align: center; font-size: 11px; color: var(--muted); letter-spacing: .5px; text-shadow: 0 1px 3px rgba(0,0,0,.5); }
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 470px) {
+  .app { padding-left: 6px; padding-right: 6px; gap: 6px; }
+  .topbar { gap: 4px; }
+  .next span { display: none; }
+  .next canvas { width: 24px; height: 24px; }
+  .icon { width: 26px; height: 26px; font-size: 12px; border-radius: 8px; }
+  .stat { min-width: 38px; padding: 2px 6px; }
+  .stat b { font-size: 15px; }
+  .progress .dot { height: 10px; border-radius: 5px; }
+  .overlay h2 { font-size: 20px; }
+  .overlay .big-score { font-size: 32px; }
+  .btn { padding: 9px 24px; font-size: 14px; }
+}
+
+@media (max-height: 700px) {
+  .app { gap: 6px; padding-top: 6px; padding-bottom: 6px; }
+  .progress .dot { height: 8px; }
+}
